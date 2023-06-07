@@ -136,13 +136,14 @@ class ESP32C6ROM(ESP32C3ROM):
 
     def read_mac(self):
         mac0 = self.read_reg(self.MAC_EFUSE_REG)
-        mac_reg1 = self.read_reg(self.MAC_EFUSE_REG + 4)
-        mac1 = mac_reg1 & 0xFFFF
-        mac_ext = (mac_reg1 >> 16) & 0xFFFF
-        bitstring = struct.pack(">HIH", mac1, mac0, mac_ext)
-        # MAC: 60:55:f9:f7:2c:a2:ff:fe
-        #     | mac1|   mac0    | mac_ext|
-        return tuple(bitstring)
+        mac1 = self.read_reg(self.MAC_EFUSE_REG + 4)  # only bottom 16 bits are MAC
+        base_mac = struct.pack(">II", mac1, mac0)[2:]
+        ext_mac = struct.pack(">H", (mac1 >> 16) & 0xFFFF)
+        mac = base_mac[0:3] + ext_mac + base_mac[3:6]
+        # BASE_MAC: 60:55:f9:f7:2c:a2
+        # EXT_MAC: ff:fe
+        # MAC: 60:55:f9:ff:fe:f7:2c:a2
+        return tuple(mac)
 
     def get_flash_crypt_config(self):
         return None  # doesn't exist on ESP32-C6

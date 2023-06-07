@@ -356,11 +356,9 @@ class EfuseMacField(EfuseField):
 
     def get(self, from_read=True):
         if self.name == "CUSTOM_MAC":
-            mac = self.get_raw(from_read)[::-1] + self.parent["MAC_EXT"].get_raw(
-                from_read
-            )
+            mac = self.get_raw(from_read)[::-1]
         elif self.name == "MAC":
-            mac = self.get_raw(from_read) + self.parent["MAC_EXT"].get_raw(from_read)
+            mac = self.get_raw(from_read)
         else:
             mac = self.get_raw(from_read)
         return "%s %s" % (util.hexify(mac, ":"), self.check())
